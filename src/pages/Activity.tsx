@@ -5,7 +5,7 @@ import { useNetworkStatus } from '../hooks/useAdEvents'
 import { useProtocolStats } from '../hooks/useMining'
 import EventRow from '../components/EventRow'
 import EmptyState from '../components/EmptyState'
-import { formatX1T } from '../lib/chain'
+import { formatKNTC } from '../lib/chain'
 
 export default function ActivityPage() {
   const [search, setSearch] = useState('')
@@ -44,7 +44,7 @@ export default function ActivityPage() {
           {[
             { l: 'Total Cycles',  v: protocol.totalCycles.toString(),          c: '#A8E6FF' },
             { l: 'Unique Miners', v: protocol.uniqueMiners.toString(),         c: '#A8E6FF' },
-            { l: 'Total Mined',   v: `${formatX1T(protocol.totalMined)} X1T`, c: '#60ffb0' },
+            { l: 'Total Mined',   v: `${formatKNTC(protocol.totalMined)} KNTC`, c: '#60ffb0' },
           ].map(({ l, v, c }) => (
             <div key={l} className="stat-box text-center">
               <div className="text-xl font-bold tabular-nums" style={{ color: c }}>{v}</div>
@@ -113,7 +113,7 @@ export default function ActivityPage() {
       <div className="card p-5">
         <h3 className="font-semibold text-white text-sm mb-2">Data Source</h3>
         <p className="text-muted text-sm leading-relaxed">
-          All events are fetched directly from the X1T Ecochain (Maculatus Testnet) via public RPC.
+          All events are fetched directly from the KNTC Ecochain (Maculatus Testnet) via public RPC.
           No centralized database — data is sourced from on-chain{' '}
           <code className="font-mono text-xs text-[#A8E6FF] bg-[rgba(168,230,255,0.08)] px-1 py-0.5 rounded">
             MiningCycleCompleted

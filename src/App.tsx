@@ -19,7 +19,7 @@ export default function App() {
           </Routes>
         </main>
         <footer className="border-t border-[rgba(168,230,255,0.05)] py-5 px-4 text-center text-xs text-subtle">
-          KineticDAO · Ad-to-Earn Mining Protocol · X1T Ecochain · Maculatus Testnet · Chain ID 10778
+          KineticDAO · Ad-to-Earn Mining Protocol · KNTC Ecochain · Maculatus Testnet · Chain ID 10778
         </footer>
       </div>
     </BrowserRouter>

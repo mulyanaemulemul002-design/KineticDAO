@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Wallet, Pickaxe, Coins, TrendingUp, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
 import { useUserMiningStats, useMiningEvents, useProtocolStats } from '../hooks/useMining'
-import { formatX1T, formatAddress, maculatusTestnet } from '../lib/chain'
+import { formatKNTC, formatAddress, maculatusTestnet } from '../lib/chain'
 import StatCard from '../components/StatCard'
 import EventRow from '../components/EventRow'
 import EmptyState from '../components/EmptyState'
@@ -63,10 +63,10 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Earned"  value={`${formatX1T(totalEarned)} X1T`} icon={Coins}    color="#60ffb0" loading={sLoading} />
+        <StatCard label="Total Earned"  value={`${formatKNTC(totalEarned)} KNTC`} icon={Coins}    color="#60ffb0" loading={sLoading} />
         <StatCard label="Cycles Done"   value={cycleCount.toString()}            icon={Pickaxe}  color="#A8E6FF" loading={sLoading} />
         <StatCard label="Per Day"       value="2x"                               icon={TrendingUp} color="#ffd060" />
-        <StatCard label="Pool Global"   value={protocol ? `${formatX1T(protocol.poolRemaining)} X1T` : '—'} sub="Remaining" icon={Coins} color="#c090ff" loading={!protocol} />
+        <StatCard label="Pool Global"   value={protocol ? `${formatKNTC(protocol.poolRemaining)} KNTC` : '—'} sub="Remaining" icon={Coins} color="#c090ff" loading={!protocol} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -115,7 +115,7 @@ export default function Dashboard() {
             {[
               { l: 'Network',    v: 'Maculatus Testnet' },
               { l: 'Chain ID',   v: '10778' },
-              { l: 'Currency',   v: 'X1T' },
+              { l: 'Currency',   v: 'KNTC' },
               { l: 'Cycle',      v: '12 hours' },
               { l: 'Last Mine',  v: lastMineAt > 0 ? new Date(lastMineAt * 1000).toLocaleString() : 'Never' },
             ].map(({ l, v }) => (
@@ -133,7 +133,7 @@ export default function Dashboard() {
               {[
                 { l: 'Total Cycles',  v: protocol.totalCycles.toString(),           c: '#A8E6FF' },
                 { l: 'Unique Miners', v: protocol.uniqueMiners.toString(),           c: '#A8E6FF' },
-                { l: 'Total Mined',   v: `${formatX1T(protocol.totalMined)} X1T`,   c: '#60ffb0' },
+                { l: 'Total Mined',   v: `${formatKNTC(protocol.totalMined)} KNTC`,   c: '#60ffb0' },
               ].map(({ l, v, c }) => (
                 <div key={l} className="flex justify-between">
                   <span className="text-muted text-sm">{l}</span>

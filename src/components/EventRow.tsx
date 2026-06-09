@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react'
-import { formatAddress, formatX1T, timeAgo, maculatusTestnet, TIER_LABEL, TIER_COLOR, type RewardTier } from '../lib/chain'
+import { formatAddress, formatKNTC, timeAgo, maculatusTestnet, TIER_LABEL, TIER_COLOR, type RewardTier } from '../lib/chain'
 
 interface EventRowProps {
   user:        `0x${string}`
@@ -47,7 +47,7 @@ export default function EventRow({ user, timestamp, reward, tier, txHash, blockN
       {/* Reward */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <div className="text-sm font-bold font-mono" style={{ color }}>
-          +{formatX1T(reward)} X1T
+          +{formatKNTC(reward)} KNTC
         </div>
         <a href={txUrl} target="_blank" rel="noopener noreferrer"
           className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted hover:text-[#A8E6FF]

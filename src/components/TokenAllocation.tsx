@@ -1,5 +1,5 @@
 import { useProtocolStats } from '../hooks/useMining'
-import { MINING_POOL, INVESTOR_POOL, TEAM_POOL, ECOSYSTEM_POOL, TOTAL_SUPPLY, formatX1T } from '../lib/chain'
+import { MINING_POOL, INVESTOR_POOL, TEAM_POOL, ECOSYSTEM_POOL, TOTAL_SUPPLY, formatKNTC } from '../lib/chain'
 import { Pickaxe, TrendingUp, Users, Leaf } from 'lucide-react'
 
 const ALLOCATIONS = [
@@ -52,7 +52,7 @@ export default function TokenAllocation() {
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-bold text-white text-lg">Token Allocation</h3>
-        <span className="text-muted text-sm">{formatX1T(TOTAL_SUPPLY)} X1T Total</span>
+        <span className="text-muted text-sm">{formatKNTC(TOTAL_SUPPLY)} KNTC Total</span>
       </div>
 
       {/* Visual bar */}
@@ -88,7 +88,7 @@ export default function TokenAllocation() {
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold text-white text-sm">{label}</span>
                   <span className="font-mono text-sm font-bold" style={{ color }}>
-                    {formatX1T(amount)} X1T
+                    {formatKNTC(amount)} KNTC
                   </span>
                 </div>
                 {isMining && (
@@ -117,7 +117,7 @@ export default function TokenAllocation() {
         <div className="card-inner p-3 flex items-center justify-between">
           <span className="text-muted text-xs">Mining pool consumed</span>
           <span className="font-mono text-xs text-[#A8E6FF] font-bold">
-            {formatX1T(stats.totalMined)} / {formatX1T(MINING_POOL)} X1T
+            {formatKNTC(stats.totalMined)} / {formatKNTC(MINING_POOL)} KNTC
             &nbsp;<span className="text-subtle">({minedPct.toFixed(4)}%)</span>
           </span>
         </div>

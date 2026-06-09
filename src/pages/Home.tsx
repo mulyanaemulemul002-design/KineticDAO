@@ -3,7 +3,7 @@ import { ArrowRight, Pickaxe, Shield, Coins, ChevronDown, Zap } from 'lucide-rea
 import { useProtocolStats } from '../hooks/useMining'
 import { useMiningEvents } from '../hooks/useMining'
 import { useWallet } from '../hooks/useWallet'
-import { formatX1T, MINING_POOL } from '../lib/chain'
+import { formatKNTC, MINING_POOL } from '../lib/chain'
 import EventRow from '../components/EventRow'
 import WalletButton from '../components/WalletButton'
 import TokenAllocation from '../components/TokenAllocation'
@@ -12,7 +12,7 @@ const features = [
   {
     icon: Pickaxe,
     title: 'Ad-to-Earn Mining',
-    desc: 'Watch a 15-second ad and trigger a 12-hour mining cycle — earn random X1T rewards twice every day.',
+    desc: 'Watch a 15-second ad and trigger a 12-hour mining cycle — earn random KNTC rewards twice every day.',
     color: '#A8E6FF',
   },
   {
@@ -24,7 +24,7 @@ const features = [
   {
     icon: Coins,
     title: '300M Mining Pool',
-    desc: '300 million X1T allocated exclusively for miners. Rewards distributed randomly from 1K to 50K X1T per cycle.',
+    desc: '300 million KNTC allocated exclusively for miners. Rewards distributed randomly from 1K to 50K KNTC per cycle.',
     color: '#ffd060',
   },
 ]
@@ -55,19 +55,19 @@ export default function Home() {
             style={{ background: 'rgba(168,230,255,0.08)', border: '1px solid rgba(168,230,255,0.2)' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-[#60ffb0] animate-pulse-glacier" />
             <span className="text-[#A8E6FF] text-xs font-semibold tracking-wide">
-              Live on X1T Ecochain · Maculatus Testnet
+              Live on KNTC Ecochain · Maculatus Testnet
             </span>
             <Zap className="w-3 h-3 text-[#A8E6FF]" />
           </div>
 
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 leading-[1.1] animate-slide-up">
             Watch Ads,{' '}
-            <span className="gradient-text">Mine X1T</span>
+            <span className="gradient-text">Mine KNTC</span>
           </h1>
 
           <p className="text-xl text-muted mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-up">
             KineticDAO is a decentralized Ad-to-Earn protocol. Every ad you watch triggers a
-            12-hour mining cycle — recorded transparently on the X1T blockchain.
+            12-hour mining cycle — recorded transparently on the KNTC blockchain.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 animate-slide-up">
@@ -92,7 +92,7 @@ export default function Home() {
               {[
                 { v: protocol.totalCycles.toString(),          l: 'Mining Cycles'  },
                 { v: protocol.uniqueMiners.toString(),         l: 'Miners'         },
-                { v: `${formatX1T(protocol.totalMined)} X1T`,  l: 'Distributed'   },
+                { v: `${formatKNTC(protocol.totalMined)} KNTC`,  l: 'Distributed'   },
               ].map(({ v, l }) => (
                 <div key={l} className="text-center">
                   <div className="text-2xl font-black text-white tabular-nums">{v}</div>
@@ -155,8 +155,8 @@ export default function Home() {
                 <div className="progress-fill" style={{ width: `${poolPct}%`, height: '100%', borderRadius: '5px' }} />
               </div>
               <div className="flex justify-between text-xs text-muted">
-                <span>{formatX1T(protocol.totalMined)} X1T mined</span>
-                <span>{formatX1T(protocol.poolRemaining)} X1T remaining</span>
+                <span>{formatKNTC(protocol.totalMined)} KNTC mined</span>
+                <span>{formatKNTC(protocol.poolRemaining)} KNTC remaining</span>
               </div>
             </div>
           </div>
@@ -195,7 +195,7 @@ export default function Home() {
             </div>
             <h2 className="text-3xl font-black text-white mb-4">Ready to Mine?</h2>
             <p className="text-muted mb-8">
-              Connect to Maculatus Testnet and start earning X1T tokens for every ad you watch — twice a day, every day.
+              Connect to Maculatus Testnet and start earning KNTC tokens for every ad you watch — twice a day, every day.
             </p>
             {address ? (
               <Link to="/mine" className="btn-primary text-base px-8 py-3.5">

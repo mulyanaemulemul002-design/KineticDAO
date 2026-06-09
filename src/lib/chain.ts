@@ -4,12 +4,12 @@ import { createPublicClient, http, defineChain, parseAbiItem } from 'viem'
 export const maculatusTestnet = defineChain({
   id: 10778,
   name: 'Maculatus Testnet',
-  nativeCurrency: { decimals: 18, name: 'X1T', symbol: 'X1T' },
+  nativeCurrency: { decimals: 18, name: 'KNTC', symbol: 'KNTC' },
   rpcUrls: {
     default: { http: ['https://maculatus-rpc.x1eco.com'] },
   },
   blockExplorers: {
-    default: { name: 'X1T Explorer', url: 'https://explorer.x1eco.com' },
+    default: { name: 'KNTC Explorer', url: 'https://explorer.x1eco.com' },
   },
   testnet: true,
 })
@@ -124,9 +124,9 @@ export const MINING_CYCLE_S  = 12 * 3600
 export type RewardTier = 0 | 1 | 2
 export const TIER_LABEL: Record<RewardTier, string> = { 0: 'Apes', 1: 'Basic', 2: 'Hoki' }
 export const TIER_RANGE: Record<RewardTier, string> = {
-  0: '0.01 – 0.09 X1T',
-  1: '1 X1T',
-  2: '3 – 5 X1T',
+  0: '0.01 – 0.09 KNTC',
+  1: '1 KNTC',
+  2: '3 – 5 KNTC',
 }
 export const TIER_COLOR: Record<RewardTier, string> = {
   0: '#ff9090', // red-ish
@@ -140,7 +140,7 @@ export function formatAddress(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`
 }
 
-export function formatX1T(wei: bigint, decimals = 3): string {
+export function formatKNTC(wei: bigint, decimals = 3): string {
   const x = Number(wei) / 1e18
   if (x === 0) return '0'
   if (x < 0.001) return '< 0.001'

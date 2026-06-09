@@ -1,5 +1,5 @@
 import { CheckCircle, ExternalLink, Frown, Smile, Star } from 'lucide-react'
-import { formatX1T, maculatusTestnet, TIER_LABEL, TIER_COLOR, TIER_RANGE, type RewardTier } from '../lib/chain'
+import { formatKNTC, maculatusTestnet, TIER_LABEL, TIER_COLOR, TIER_RANGE, type RewardTier } from '../lib/chain'
 
 interface MiningResultProps {
   reward:  bigint | null
@@ -45,9 +45,9 @@ export default function MiningResult({ reward, tier, txHash, onReset }: MiningRe
       {reward !== null && reward > 0n ? (
         <div className="animate-count-up">
           <div className="text-5xl font-black text-white mb-1 tabular-nums">
-            +{formatX1T(reward)}
+            +{formatKNTC(reward)}
           </div>
-          <div className="font-bold text-lg mb-1" style={{ color }}>X1T Earned</div>
+          <div className="font-bold text-lg mb-1" style={{ color }}>KNTC Earned</div>
           <div className="text-muted text-sm">{meta.sub}</div>
         </div>
       ) : (

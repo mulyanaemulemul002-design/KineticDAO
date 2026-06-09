@@ -10,20 +10,20 @@ const AD_DURATION = 15 // seconds
 
 const ADS = [
   {
-    title: 'X1T Ecochain — The Future of Web3',
+    title: 'KNTC Ecochain — The Future of Web3',
     subtitle: 'Fast. Scalable. Transparent.',
     tag: 'Ecosystem Sponsor',
     color: 'from-[#001828] to-[#0d2a42]',
   },
   {
     title: 'KineticDAO Mining Pool — Earn Daily',
-    subtitle: '300M X1T allocated for miners like you.',
+    subtitle: '300M KNTC allocated for miners like you.',
     tag: 'Protocol Ad',
     color: 'from-[#042030] to-[#082035]',
   },
   {
     title: 'Maculatus Testnet — Build On-Chain',
-    subtitle: 'Deploy smart contracts on X1T infrastructure.',
+    subtitle: 'Deploy smart contracts on KNTC infrastructure.',
     tag: 'Developer Tools',
     color: 'from-[#001020] to-[#0d2a42]',
   },

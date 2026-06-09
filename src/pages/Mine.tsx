@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Pickaxe, Wallet, AlertCircle, Loader2, AlertTriangle, Frown, Smile, Star } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
 import { useUserMiningStats, useMineAction, useProtocolStats } from '../hooks/useMining'
-import { formatX1T, formatAddress, CONTRACT_ADDRESS, TIER_LABEL, TIER_COLOR, TIER_RANGE } from '../lib/chain'
+import { formatKNTC, formatAddress, CONTRACT_ADDRESS, TIER_LABEL, TIER_COLOR, TIER_RANGE } from '../lib/chain'
 import AdPlayer from '../components/AdPlayer'
 import MiningClock from '../components/MiningClock'
 import MiningResult from '../components/MiningResult'
@@ -50,7 +50,7 @@ export default function Mine() {
         </div>
         <h2 className="text-2xl font-bold text-white mb-3">Connect Wallet to Mine</h2>
         <p className="text-muted mb-8">
-          Connect your Web3 wallet to Maculatus Testnet to start watching ads and earning X1T tokens.
+          Connect your Web3 wallet to Maculatus Testnet to start watching ads and earning KNTC tokens.
         </p>
         <div className="flex justify-center"><WalletButton /></div>
       </div>
@@ -91,7 +91,7 @@ export default function Mine() {
         <div className="lg:col-span-3 space-y-5">
 
           <div>
-            <h1 className="text-2xl font-bold text-white">Mine X1T</h1>
+            <h1 className="text-2xl font-bold text-white">Mine KNTC</h1>
             <p className="text-muted text-sm mt-1">
               Watch a 15s ad to start a 12-hour mining cycle. Reward varies by luck tier.
             </p>
@@ -127,7 +127,7 @@ export default function Mine() {
               </div>
               <div className="flex items-center gap-3">
                 {totalEarned > 0n && (
-                  <span className="badge badge-glacier">{formatX1T(totalEarned)} X1T earned</span>
+                  <span className="badge badge-glacier">{formatKNTC(totalEarned)} KNTC earned</span>
                 )}
                 <span className="text-muted text-xs font-mono">{formatAddress(address)}</span>
               </div>
@@ -153,7 +153,7 @@ export default function Mine() {
                           <span className="text-[#A8E6FF] font-mono">1</span>
                           {' '}·{' '}
                           <span className="text-[#60ffb0] font-mono">3–5</span>
-                          {' '}X1T
+                          {' '}KNTC
                         </div>
                       </div>
 
@@ -201,7 +201,7 @@ export default function Mine() {
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: 'Cycles Done',  value: cycles.toString(),               color: '#A8E6FF' },
-              { label: 'Total Earned', value: `${formatX1T(totalEarned)} X1T`, color: '#60ffb0' },
+              { label: 'Total Earned', value: `${formatKNTC(totalEarned)} KNTC`, color: '#60ffb0' },
               { label: 'Per Day',      value: '2x',                            color: '#ffd060' },
             ].map(({ label, value, color }) => (
               <div key={label} className="stat-box text-center">
@@ -225,8 +225,8 @@ export default function Mine() {
               {[
                 { label: 'Total Cycles',   value: protocol.totalCycles.toString(),             color: '#A8E6FF' },
                 { label: 'Unique Miners',  value: protocol.uniqueMiners.toString(),            color: '#A8E6FF' },
-                { label: 'Pool Remaining', value: `${formatX1T(protocol.poolRemaining)} X1T`, color: '#60ffb0' },
-                { label: 'Pool Size',      value: '700M X1T',                                  color: '#ffd060' },
+                { label: 'Pool Remaining', value: `${formatKNTC(protocol.poolRemaining)} KNTC`, color: '#60ffb0' },
+                { label: 'Pool Size',      value: '700M KNTC',                                  color: '#ffd060' },
               ].map(({ label, value, color }) => (
                 <div key={label} className="flex justify-between items-center">
                   <span className="text-muted text-sm">{label}</span>

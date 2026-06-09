@@ -5,16 +5,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title KineticDAO — Ad-to-Earn Mining Protocol
-/// @notice Watch ads to trigger 12-hour mining cycles and earn X1T tokens
-/// @dev X1T Ecochain (Maculatus Testnet, Chain ID: 10778)
+/// @notice Watch ads to trigger 12-hour mining cycles and earn KNTC tokens
+/// @dev KNTC Ecochain (Maculatus Testnet, Chain ID: 10778)
 ///
 /// Reward tiers per 12h session (emitted via calculateReward):
-///   APES  (~8%)  — unlucky session:  0.01 – 0.09 X1T
-///   BASIC (~90%) — normal session:   1.00 X1T  (exact)
-///   HOKI  (~2%)  — lucky session:    3  – 5   X1T
+///   APES  (~8%)  — unlucky session:  0.01 – 0.09 KNTC
+///   BASIC (~90%) — normal session:   1.00 KNTC  (exact)
+///   HOKI  (~2%)  — lucky session:    3  – 5   KNTC
 ///
-/// Pool sustainability target: 700M X1T lasts ≥ 2.5 years.
-/// Worst-case avg reward ≈ 0.985 X1T/session → daily burn = active_miners × 2 × 0.985
+/// Pool sustainability target: 700M KNTC lasts ≥ 2.5 years.
+/// Worst-case avg reward ≈ 0.985 KNTC/session → daily burn = active_miners × 2 × 0.985
 contract KineticDAO is Ownable, ReentrancyGuard {
 
     // ─── Token Allocation (1 Billion total, 18 decimals) ─────────────────────
@@ -33,13 +33,13 @@ contract KineticDAO is Ownable, ReentrancyGuard {
     uint256 private constant TIER_HOKI_START= 970;  // [970,999]
 
     // ─── Reward Amounts (18 decimals) ─────────────────────────────────────────
-    // APES tier: 0.01 ether + subRand(0..8) × 0.01 ether  →  0.01 – 0.09 X1T
+    // APES tier: 0.01 ether + subRand(0..8) × 0.01 ether  →  0.01 – 0.09 KNTC
     uint256 private constant APES_BASE   = 0.01  ether;
     uint256 private constant APES_STEP   = 0.01  ether;
     uint256 private constant APES_STEPS  = 9;            // 9 steps → 0.01..0.09
-    // BASIC tier: exactly 1 X1T
+    // BASIC tier: exactly 1 KNTC
     uint256 private constant BASIC_REWARD= 1     ether;
-    // HOKI tier: 3 + subRand(0..2) X1T  →  3 – 5 X1T
+    // HOKI tier: 3 + subRand(0..2) KNTC  →  3 – 5 KNTC
     uint256 private constant HOKI_BASE   = 3     ether;
     uint256 private constant HOKI_STEPS  = 3;            // 3 steps → 3, 4, 5
 
@@ -112,15 +112,15 @@ contract KineticDAO is Ownable, ReentrancyGuard {
         uint256 rand2 = uint256(h >> 128); // upper 128 bits for sub-randomness
 
         if (rand1 < TIER_APES_END) {
-            // APES — 0.01, 0.02, … 0.09 X1T
+            // APES — 0.01, 0.02, … 0.09 KNTC
             tier   = 0;
             reward = APES_BASE + (rand2 % APES_STEPS) * APES_STEP;
         } else if (rand1 >= TIER_HOKI_START) {
-            // HOKI — 3, 4, or 5 X1T
+            // HOKI — 3, 4, or 5 KNTC
             tier   = 2;
             reward = HOKI_BASE + (rand2 % HOKI_STEPS) * 1 ether;
         } else {
-            // BASIC — exactly 1 X1T
+            // BASIC — exactly 1 KNTC
             tier   = 1;
             reward = BASIC_REWARD;
         }

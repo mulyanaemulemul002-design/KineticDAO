@@ -2,8 +2,8 @@
 
 ## Overview
 
-KineticDAO is an Ad-to-Earn DAO protocol on the X1T Ecochain (Maculatus Testnet).
-Users watch ads and earn X1T tokens. Every impression is recorded as an on-chain event
+KineticDAO is an Ad-to-Earn DAO protocol on the KNTC Ecochain (Maculatus Testnet).
+Users watch ads and earn KNTC tokens. Every impression is recorded as an on-chain event
 for full transparency — no centralized database.
 
 ## Stack
@@ -12,7 +12,7 @@ for full transparency — no centralized database.
 - **Web3:** viem (wallet + public client)
 - **Data:** TanStack Query (caching on-chain event logs)
 - **Smart Contract:** Solidity (OpenZeppelin Ownable + ReentrancyGuard)
-- **Network:** X1T Ecochain, Maculatus Testnet (Chain ID: 10778)
+- **Network:** KNTC Ecochain, Maculatus Testnet (Chain ID: 10778)
 
 ## Project Structure
 
