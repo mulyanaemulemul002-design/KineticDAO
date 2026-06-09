@@ -1,5 +1,5 @@
 import { defineConfig } from 'hardhat/config'
-import '@nomicfoundation/hardhat-ethers'
+import hardhatEthers from '@nomicfoundation/hardhat-ethers'
 
 export default defineConfig({
   solidity: {
@@ -8,7 +8,7 @@ export default defineConfig({
       optimizer: { enabled: true, runs: 200 },
     },
   },
-  plugins: ['@nomicfoundation/hardhat-ethers'],
+  plugins: [hardhatEthers],
   networks: {
     maculatus: {
       type: 'http',
