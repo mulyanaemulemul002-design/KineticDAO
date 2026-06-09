@@ -31,8 +31,6 @@ export const KINETIC_ABI = [
   { type: 'function', name: 'totalMinedTokens',   inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
   { type: 'function', name: 'totalMiningCycles',  inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
   { type: 'function', name: 'uniqueMiners',        inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
-  { type: 'function', name: 'minReward',           inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
-  { type: 'function', name: 'maxReward',           inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
   // User views
   {
     type: 'function', name: 'getUserStats',
@@ -70,20 +68,27 @@ export const KINETIC_ABI = [
     ],
     stateMutability: 'pure',
   },
+  {
+    type: 'function', name: 'previewReward',
+    inputs: [{ name: 'user', type: 'address' }],
+    outputs: [{ name: 'reward', type: 'uint256' }, { name: 'tier', type: 'uint8' }],
+    stateMutability: 'view',
+  },
   // Write
   {
     type: 'function', name: 'mine',
     inputs: [],
-    outputs: [{ name: 'reward', type: 'uint256' }],
+    outputs: [{ name: 'reward', type: 'uint256' }, { name: 'tier', type: 'uint8' }],
     stateMutability: 'nonpayable',
   },
-  // Events
+  // Events — tier: 0=APES 1=BASIC 2=HOKI
   {
     type: 'event', name: 'AdWatched',
     inputs: [
       { name: 'user',      type: 'address', indexed: true  },
       { name: 'timestamp', type: 'uint256', indexed: false },
       { name: 'reward',    type: 'uint256', indexed: false },
+      { name: 'tier',      type: 'uint8',   indexed: false },
     ],
   },
   {
@@ -92,6 +97,7 @@ export const KINETIC_ABI = [
       { name: 'user',          type: 'address', indexed: true  },
       { name: 'cycleId',       type: 'uint256', indexed: true  },
       { name: 'reward',        type: 'uint256', indexed: false },
+      { name: 'tier',          type: 'uint8',   indexed: false },
       { name: 'timestamp',     type: 'uint256', indexed: false },
       { name: 'poolRemaining', type: 'uint256', indexed: false },
     ],
@@ -99,20 +105,34 @@ export const KINETIC_ABI = [
 ] as const
 
 export const AD_WATCHED_EVENT = parseAbiItem(
-  'event AdWatched(address indexed user, uint256 timestamp, uint256 reward)'
+  'event AdWatched(address indexed user, uint256 timestamp, uint256 reward, uint8 tier)'
 )
 
 export const MINING_COMPLETED_EVENT = parseAbiItem(
-  'event MiningCycleCompleted(address indexed user, uint256 indexed cycleId, uint256 reward, uint256 timestamp, uint256 poolRemaining)'
+  'event MiningCycleCompleted(address indexed user, uint256 indexed cycleId, uint256 reward, uint8 tier, uint256 timestamp, uint256 poolRemaining)'
 )
 
-// ─── Token constants ──────────────────────────────────────────────────────────
-export const TOTAL_SUPPLY    = 500_000_000n * 10n ** 18n
-export const MINING_POOL     = 300_000_000n * 10n ** 18n
-export const INVESTOR_POOL   =  75_000_000n * 10n ** 18n
-export const TEAM_POOL       =  50_000_000n * 10n ** 18n
-export const ECOSYSTEM_POOL  =  75_000_000n * 10n ** 18n
-export const MINING_CYCLE_S  = 12 * 3600 // 12 hours in seconds
+// ─── Token Allocation Constants (mirrors contract) ────────────────────────────
+export const TOTAL_SUPPLY    = 1_000_000_000n * 10n ** 18n
+export const MINING_POOL     =   700_000_000n * 10n ** 18n
+export const INVESTOR_POOL   =   100_000_000n * 10n ** 18n
+export const TEAM_POOL       =    25_000_000n * 10n ** 18n
+export const ECOSYSTEM_POOL  =   175_000_000n * 10n ** 18n
+export const MINING_CYCLE_S  = 12 * 3600
+
+// ─── Reward Tier Labels ───────────────────────────────────────────────────────
+export type RewardTier = 0 | 1 | 2
+export const TIER_LABEL: Record<RewardTier, string> = { 0: 'Apes', 1: 'Basic', 2: 'Hoki' }
+export const TIER_RANGE: Record<RewardTier, string> = {
+  0: '0.01 – 0.09 X1T',
+  1: '1 X1T',
+  2: '3 – 5 X1T',
+}
+export const TIER_COLOR: Record<RewardTier, string> = {
+  0: '#ff9090', // red-ish
+  1: '#A8E6FF', // glacier
+  2: '#60ffb0', // green
+}
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 export function formatAddress(addr: string): string {
@@ -120,12 +140,12 @@ export function formatAddress(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`
 }
 
-export function formatX1T(wei: bigint, decimals = 2): string {
+export function formatX1T(wei: bigint, decimals = 3): string {
   const x = Number(wei) / 1e18
   if (x === 0) return '0'
   if (x < 0.001) return '< 0.001'
-  if (x >= 1_000_000) return `${(x / 1_000_000).toFixed(decimals)}M`
-  if (x >= 1_000)     return `${(x / 1_000).toFixed(decimals)}K`
+  if (x >= 1_000_000) return `${(x / 1_000_000).toFixed(2)}M`
+  if (x >= 1_000)     return `${(x / 1_000).toFixed(2)}K`
   return x.toFixed(decimals)
 }
 
