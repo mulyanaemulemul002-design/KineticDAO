@@ -1,0 +1,2 @@
+- [Vite env types](vite-env.md) — add `/// <reference types="vite/client" />` at top of any file using `import.meta.env`
+- [viem writeContract chain param](viem-writecontract.md) — pass `chain: null` when wallet client was created with `custom(window.ethereum)`; omitting `chain` causes TS error about missing property

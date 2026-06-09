@@ -1,58 +1,44 @@
 import { type LucideIcon } from 'lucide-react'
-import clsx from 'clsx'
 
 interface StatCardProps {
-  label: string
-  value: string
-  subValue?: string
-  icon: LucideIcon
-  iconColor?: string
-  trend?: 'up' | 'down' | 'neutral'
-  loading?: boolean
+  label:     string
+  value:     string
+  sub?:      string
+  icon:      LucideIcon
+  color?:    string
+  loading?:  boolean
 }
 
-export default function StatCard({
-  label,
-  value,
-  subValue,
-  icon: Icon,
-  iconColor = 'text-brand-400',
-  trend,
-  loading,
-}: StatCardProps) {
+export default function StatCard({ label, value, sub, icon: Icon, color = '#A8E6FF', loading }: StatCardProps) {
+  const rgb = hexToRgb(color)
+
   if (loading) {
     return (
-      <div className="card p-5 animate-pulse">
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-9 h-9 rounded-xl bg-white/5" />
-          <div className="w-16 h-4 rounded bg-white/5" />
-        </div>
-        <div className="w-24 h-7 rounded bg-white/5 mb-1" />
-        <div className="w-32 h-4 rounded bg-white/5" />
+      <div className="card p-5">
+        <div className="shimmer w-9 h-9 rounded-xl mb-4" />
+        <div className="shimmer h-7 w-24 rounded-lg mb-2" />
+        <div className="shimmer h-4 w-16 rounded-md" />
       </div>
     )
   }
 
   return (
-    <div className="card p-5 hover:border-white/20 transition-all duration-200 group">
-      <div className="flex items-start justify-between mb-3">
-        <div className={clsx('p-2 rounded-xl bg-white/5', iconColor.replace('text-', 'group-hover:bg-').replace('400', '400/10'))}>
-          <Icon className={clsx('w-4.5 h-4.5', iconColor)} />
-        </div>
-        {trend && (
-          <span className={clsx(
-            'text-xs font-medium px-2 py-0.5 rounded-full',
-            trend === 'up' ? 'text-emerald-400 bg-emerald-400/10' :
-            trend === 'down' ? 'text-red-400 bg-red-400/10' :
-            'text-gray-400 bg-white/5'
-          )}>
-            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '—'}
-          </span>
-        )}
+    <div className="card p-5 hover:border-[rgba(168,230,255,0.14)] transition-all duration-200 group">
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
+        style={{ background: `rgba(${rgb},0.1)`, border: `1px solid rgba(${rgb},0.18)` }}>
+        <Icon className="w-4 h-4" style={{ color }} />
       </div>
-      <div className="stat-value text-2xl mb-0.5">{value}</div>
-      <div className="stat-label">{label}</div>
-      {subValue && <div className="text-xs text-gray-500 mt-1">{subValue}</div>}
+      <div className="text-2xl font-bold text-white tabular-nums leading-tight">{value}</div>
+      <div className="text-muted text-sm mt-0.5">{label}</div>
+      {sub && <div className="text-subtle text-xs mt-1">{sub}</div>}
     </div>
   )
+}
+
+function hexToRgb(hex: string): string {
+  if (!hex.startsWith('#')) return '168,230,255'
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `${r},${g},${b}`
 }

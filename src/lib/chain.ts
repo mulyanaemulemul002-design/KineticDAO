@@ -1,23 +1,15 @@
-import { createPublicClient, http, defineChain } from 'viem'
+/// <reference types="vite/client" />
+import { createPublicClient, http, defineChain, parseAbiItem } from 'viem'
 
 export const maculatusTestnet = defineChain({
   id: 10778,
   name: 'Maculatus Testnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'X1T',
-    symbol: 'X1T',
-  },
+  nativeCurrency: { decimals: 18, name: 'X1T', symbol: 'X1T' },
   rpcUrls: {
-    default: {
-      http: ['https://maculatus-rpc.x1eco.com'],
-    },
+    default: { http: ['https://maculatus-rpc.x1eco.com'] },
   },
   blockExplorers: {
-    default: {
-      name: 'X1T Explorer',
-      url: 'https://explorer.x1eco.com',
-    },
+    default: { name: 'X1T Explorer', url: 'https://explorer.x1eco.com' },
   },
   testnet: true,
 })
@@ -27,37 +19,131 @@ export const publicClient = createPublicClient({
   transport: http('https://maculatus-rpc.x1eco.com'),
 })
 
-export const AD_WATCHED_ABI = [
+export const CONTRACT_ADDRESS = (
+  import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000'
+) as `0x${string}`
+
+// ─── ABIs ─────────────────────────────────────────────────────────────────────
+
+export const KINETIC_ABI = [
+  // State reads
+  { type: 'function', name: 'miningPoolRemaining', inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  { type: 'function', name: 'totalMinedTokens',   inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  { type: 'function', name: 'totalMiningCycles',  inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  { type: 'function', name: 'uniqueMiners',        inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  { type: 'function', name: 'minReward',           inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  { type: 'function', name: 'maxReward',           inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  // User views
   {
-    type: 'event',
-    name: 'AdWatched',
+    type: 'function', name: 'getUserStats',
+    inputs: [{ name: 'user', type: 'address' }],
+    outputs: [
+      { name: '_totalEarned', type: 'uint256' },
+      { name: '_cycleCount',  type: 'uint256' },
+      { name: '_lastMineAt',  type: 'uint256' },
+      { name: '_cooldown',    type: 'uint256' },
+      { name: '_canMine',     type: 'bool'    },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function', name: 'canMine',
+    inputs: [{ name: 'user', type: 'address' }],
+    outputs: [{ type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function', name: 'cooldownRemaining',
+    inputs: [{ name: 'user', type: 'address' }],
+    outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function', name: 'getAllocation',
+    inputs: [],
+    outputs: [
+      { name: 'mining',    type: 'uint256' },
+      { name: 'investor',  type: 'uint256' },
+      { name: 'team',      type: 'uint256' },
+      { name: 'ecosystem', type: 'uint256' },
+      { name: 'total',     type: 'uint256' },
+    ],
+    stateMutability: 'pure',
+  },
+  // Write
+  {
+    type: 'function', name: 'mine',
+    inputs: [],
+    outputs: [{ name: 'reward', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+  },
+  // Events
+  {
+    type: 'event', name: 'AdWatched',
     inputs: [
-      { name: 'user', type: 'address', indexed: true },
+      { name: 'user',      type: 'address', indexed: true  },
       { name: 'timestamp', type: 'uint256', indexed: false },
-      { name: 'reward', type: 'uint256', indexed: false },
+      { name: 'reward',    type: 'uint256', indexed: false },
+    ],
+  },
+  {
+    type: 'event', name: 'MiningCycleCompleted',
+    inputs: [
+      { name: 'user',          type: 'address', indexed: true  },
+      { name: 'cycleId',       type: 'uint256', indexed: true  },
+      { name: 'reward',        type: 'uint256', indexed: false },
+      { name: 'timestamp',     type: 'uint256', indexed: false },
+      { name: 'poolRemaining', type: 'uint256', indexed: false },
     ],
   },
 ] as const
 
-export const CONTRACT_ADDRESS = (import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000') as `0x${string}`
+export const AD_WATCHED_EVENT = parseAbiItem(
+  'event AdWatched(address indexed user, uint256 timestamp, uint256 reward)'
+)
 
-export function formatAddress(address: string): string {
-  if (!address || address.length < 10) return address
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
+export const MINING_COMPLETED_EVENT = parseAbiItem(
+  'event MiningCycleCompleted(address indexed user, uint256 indexed cycleId, uint256 reward, uint256 timestamp, uint256 poolRemaining)'
+)
+
+// ─── Token constants ──────────────────────────────────────────────────────────
+export const TOTAL_SUPPLY    = 500_000_000n * 10n ** 18n
+export const MINING_POOL     = 300_000_000n * 10n ** 18n
+export const INVESTOR_POOL   =  75_000_000n * 10n ** 18n
+export const TEAM_POOL       =  50_000_000n * 10n ** 18n
+export const ECOSYSTEM_POOL  =  75_000_000n * 10n ** 18n
+export const MINING_CYCLE_S  = 12 * 3600 // 12 hours in seconds
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+export function formatAddress(addr: string): string {
+  if (!addr || addr.length < 10) return addr
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`
 }
 
-export function formatX1T(wei: bigint): string {
-  const x1t = Number(wei) / 1e18
-  if (x1t < 0.001) return '< 0.001'
-  if (x1t >= 1_000_000) return `${(x1t / 1_000_000).toFixed(2)}M`
-  if (x1t >= 1_000) return `${(x1t / 1_000).toFixed(2)}K`
-  return x1t.toFixed(4)
+export function formatX1T(wei: bigint, decimals = 2): string {
+  const x = Number(wei) / 1e18
+  if (x === 0) return '0'
+  if (x < 0.001) return '< 0.001'
+  if (x >= 1_000_000) return `${(x / 1_000_000).toFixed(decimals)}M`
+  if (x >= 1_000)     return `${(x / 1_000).toFixed(decimals)}K`
+  return x.toFixed(decimals)
 }
 
-export function timeAgo(timestampSeconds: number): string {
-  const diff = Math.floor(Date.now() / 1000) - timestampSeconds
-  if (diff < 60) return `${diff}s ago`
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+export function formatDuration(seconds: number): { h: string; m: string; s: string } {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  return {
+    h: h.toString().padStart(2, '0'),
+    m: m.toString().padStart(2, '0'),
+    s: s.toString().padStart(2, '0'),
+  }
+}
+
+export function timeAgo(ts: number): string {
+  const diff = Math.floor(Date.now() / 1000) - ts
+  if (diff < 60)    return `${diff}s ago`
+  if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
   return `${Math.floor(diff / 86400)}d ago`
 }

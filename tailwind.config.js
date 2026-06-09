@@ -1,48 +1,22 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html","./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        brand: {
-          50:  '#f0f4ff',
-          100: '#dbe4ff',
-          200: '#bac8ff',
-          300: '#91a7ff',
-          400: '#748ffc',
-          500: '#5c7cfa',
-          600: '#4c6ef5',
-          700: '#4263eb',
-          800: '#3b5bdb',
-          900: '#364fc7',
-          950: '#1e3a8a',
+        glacier: {
+          50:'#f0faff', 100:'#ddf3ff', 200:'#c0eaff',
+          300:'#A8E6FF', 400:'#7dd4f5', 500:'#4bbee8',
+          600:'#2da3cf', 700:'#1a84ae', 800:'#0d6a8e', 900:'#064e6a',
         },
-        accent: {
-          400: '#f59e0b',
-          500: '#f97316',
-        }
+        navy: {
+          950:'#001020', 900:'#001828', 800:'#042030',
+          700:'#082035', 600:'#0d2a42', 500:'#153450',
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.4s ease-out',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'pulse-slow': 'pulse 3s infinite',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
+        sans: ['Inter','system-ui','sans-serif'],
+        mono: ['JetBrains Mono','monospace'],
       },
     },
   },

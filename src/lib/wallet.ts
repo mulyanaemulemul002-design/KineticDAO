@@ -13,13 +13,8 @@ declare global {
 }
 
 export async function connectWallet(): Promise<`0x${string}`[]> {
-  if (!window.ethereum) {
-    throw new Error('No Web3 wallet detected. Please install MetaMask or a compatible wallet.')
-  }
-  const accounts = await window.ethereum.request({
-    method: 'eth_requestAccounts',
-  }) as `0x${string}`[]
-  return accounts
+  if (!window.ethereum) throw new Error('No Web3 wallet detected. Install MetaMask or a compatible wallet.')
+  return window.ethereum.request({ method: 'eth_requestAccounts' }) as Promise<`0x${string}`[]>
 }
 
 export async function switchToMaculatus(): Promise<void> {
@@ -30,30 +25,22 @@ export async function switchToMaculatus(): Promise<void> {
       params: [{ chainId: `0x${maculatusTestnet.id.toString(16)}` }],
     })
   } catch (err: unknown) {
-    const switchError = err as { code?: number }
-    if (switchError?.code === 4902) {
+    if ((err as { code?: number }).code === 4902) {
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
-        params: [
-          {
-            chainId: `0x${maculatusTestnet.id.toString(16)}`,
-            chainName: maculatusTestnet.name,
-            nativeCurrency: maculatusTestnet.nativeCurrency,
-            rpcUrls: [maculatusTestnet.rpcUrls.default.http[0]],
-            blockExplorerUrls: [maculatusTestnet.blockExplorers.default.url],
-          },
-        ],
+        params: [{
+          chainId: `0x${maculatusTestnet.id.toString(16)}`,
+          chainName: maculatusTestnet.name,
+          nativeCurrency: maculatusTestnet.nativeCurrency,
+          rpcUrls: [maculatusTestnet.rpcUrls.default.http[0]],
+          blockExplorerUrls: [maculatusTestnet.blockExplorers.default.url],
+        }],
       })
-    } else {
-      throw err
-    }
+    } else throw err
   }
 }
 
 export function getWalletClient(): WalletClient | null {
   if (!window.ethereum) return null
-  return createWalletClient({
-    chain: maculatusTestnet,
-    transport: custom(window.ethereum),
-  })
+  return createWalletClient({ chain: maculatusTestnet, transport: custom(window.ethereum) })
 }
