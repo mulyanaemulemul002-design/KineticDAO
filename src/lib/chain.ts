@@ -10,7 +10,7 @@ export const maculatusTestnet = defineChain({
     default: { http: ['https://maculatus-rpc.x1eco.com'] },
   },
   blockExplorers: {
-    default: { name: 'KNTC Explorer', url: 'https://explorer.x1eco.com' },
+    default: { name: 'Maculatus Scan', url: 'https://maculatus-scan.x1eco.com' },
   },
   testnet: true,
 })

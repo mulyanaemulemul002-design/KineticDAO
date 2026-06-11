@@ -3,10 +3,9 @@ import { ArrowRight, Pickaxe, Shield, Coins, ChevronDown, Zap } from 'lucide-rea
 import { useProtocolStats } from '../hooks/useMining'
 import { useMiningEvents } from '../hooks/useMining'
 import { useWallet } from '../hooks/useWallet'
-import { formatKNTC, MINING_POOL } from '../lib/chain'
+import { formatKNTC } from '../lib/chain'
 import EventRow from '../components/EventRow'
 import WalletButton from '../components/WalletButton'
-import TokenAllocation from '../components/TokenAllocation'
 
 const features = [
   {
@@ -33,10 +32,6 @@ export default function Home() {
   const { address } = useWallet()
   const { data: protocol } = useProtocolStats()
   const { data: events } = useMiningEvents()
-
-  const poolPct = protocol
-    ? Number((protocol.poolRemaining * 10000n) / MINING_POOL) / 100
-    : 100
 
   return (
     <div className="min-h-screen">
@@ -132,36 +127,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── Token allocation ─────────────────────────────────────────── */}
-      <section className="py-16 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="card-glow p-7">
-            <TokenAllocation />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Mining pool progress ─────────────────────────────────────── */}
-      {protocol && (
-        <section className="py-8 px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="card p-6">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-white">Mining Pool Status</h3>
-                <span className="badge badge-glacier">{poolPct.toFixed(2)}% Remaining</span>
-              </div>
-              <div className="progress-track mb-2" style={{ height: '10px', borderRadius: '5px' }}>
-                <div className="progress-fill" style={{ width: `${poolPct}%`, height: '100%', borderRadius: '5px' }} />
-              </div>
-              <div className="flex justify-between text-xs text-muted">
-                <span>{formatKNTC(protocol.totalMined)} KNTC mined</span>
-                <span>{formatKNTC(protocol.poolRemaining)} KNTC remaining</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── Recent activity ──────────────────────────────────────────── */}
       {events && events.length > 0 && (

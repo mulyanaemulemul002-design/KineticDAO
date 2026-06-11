@@ -3,13 +3,12 @@ import { Pickaxe, Wallet, AlertCircle, Loader2, AlertTriangle, Frown, Smile, Sta
 import { useWallet } from '../hooks/useWallet'
 import { useUserMiningStats, useMineAction, useClaimAction, useProtocolStats } from '../hooks/useMining'
 import { formatKNTC, formatAddress, MINING_ADDRESS, TIER_LABEL, TIER_COLOR, TIER_RANGE, TIER_CHANCE } from '../lib/chain'
-import AdPlayer from '../components/AdPlayer'
+import AdModal from '../components/AdModal'
 import MiningClock from '../components/MiningClock'
 import MiningResult from '../components/MiningResult'
-import TokenAllocation from '../components/TokenAllocation'
 import WalletButton from '../components/WalletButton'
 
-type Phase = 'watch' | 'mine' | 'result'
+type Phase = 'idle' | 'ad' | 'mining' | 'result'
 
 const TIER_ICONS = [Frown, Smile, Star]
 
@@ -19,28 +18,39 @@ export default function Mine() {
   const { data: protocol } = useProtocolStats()
   const { status, txHash, reward, tier, error, execute, reset } = useMineAction(address ?? undefined)
   const { status: claimStatus, execute: executeClaim, error: claimError } = useClaimAction(address ?? undefined)
-  const [phase, setPhase] = useState<Phase>('watch')
+  const [phase, setPhase] = useState<Phase>('idle')
 
-  const canMine      = stats?.canMine ?? true
-  const cooldown     = Number(stats?.cooldown ?? 0n)
-  const cycles       = Number(stats?.cycleCount ?? 0n)
-  const pendingClaim = stats?.pendingClaim ?? 0n
-  const tgeActive    = stats?.tgeActive   ?? false
+  const canMine             = stats?.canMine ?? true
+  const cooldown            = Number(stats?.cooldown ?? 0n)
+  const cycles              = Number(stats?.cycleCount ?? 0n)
+  const pendingClaim        = stats?.pendingClaim ?? 0n
+  const tgeActive           = stats?.tgeActive   ?? false
   const contractNotDeployed = MINING_ADDRESS === '0x0000000000000000000000000000000000000000'
 
-  function handleAdComplete() { setPhase('mine') }
+  // User clicks Mine — open ad popup
+  function handleStartMine() {
+    if (!canMine || phase !== 'idle') return
+    setPhase('ad')
+  }
 
-  async function handleMine() {
+  // Ad finished → auto-trigger on-chain mine
+  async function handleAdComplete() {
+    setPhase('mining')
     await execute()
     setPhase('result')
   }
 
-  function handleReset() {
-    reset()
-    setPhase('watch')
+  // User closes ad before it finishes (only if skippable)
+  function handleAdClose() {
+    setPhase('idle')
   }
 
-  const showResult = status === 'success' || (phase === 'result' && status !== 'error')
+  function handleReset() {
+    reset()
+    setPhase('idle')
+  }
+
+  const showResult = status === 'success' || phase === 'result'
 
   // ── Not connected ────────────────────────────────────────────────────────
   if (!address) {
@@ -72,6 +82,11 @@ export default function Mine() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 animate-fade-in">
+
+      {/* Ad popup overlay */}
+      {phase === 'ad' && (
+        <AdModal onComplete={handleAdComplete} onClose={handleAdClose} />
+      )}
 
       {/* Demo mode warning */}
       {contractNotDeployed && (
@@ -110,7 +125,7 @@ export default function Mine() {
           <div>
             <h1 className="text-2xl font-bold text-white">Mine KNTC</h1>
             <p className="text-muted text-sm mt-1">
-              Watch a 15s ad to start a 12-hour mining cycle. Credits accumulate on-chain until TGE.
+              Click Mine to watch an ad — mining starts automatically when the ad ends.
             </p>
           </div>
 
@@ -134,9 +149,16 @@ export default function Mine() {
           <div className="card-glow overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(168,230,255,0.06)]">
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${canMine ? 'bg-[#60ffb0] animate-pulse-glacier' : 'bg-[#A8E6FF]'}`} />
+                <div className={`w-2 h-2 rounded-full ${
+                  phase === 'mining' ? 'bg-[#ffd060] animate-pulse-glacier' :
+                  canMine            ? 'bg-[#60ffb0] animate-pulse-glacier' :
+                                       'bg-[#A8E6FF]'
+                }`} />
                 <span className="text-sm font-semibold text-white">
-                  {statsLoading ? 'Loading...' : canMine ? 'Ready to Mine' : 'Cooldown Active'}
+                  {statsLoading        ? 'Loading...'      :
+                   phase === 'mining'  ? 'Recording on-chain...' :
+                   canMine             ? 'Ready to Mine'   :
+                                         'Cooldown Active'}
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -152,25 +174,41 @@ export default function Mine() {
                 <MiningResult reward={reward} tier={tier} txHash={txHash} onReset={handleReset} />
               ) : (
                 <>
-                  <AdPlayer onComplete={handleAdComplete} disabled={!canMine || phase !== 'watch'} />
-
-                  {phase === 'mine' && canMine && (
-                    <div className="mt-5 animate-slide-up">
-                      <div className="card-inner p-4 mb-4 text-center">
-                        <div className="text-white font-semibold mb-1">Ad watched! Start your mining cycle.</div>
-                        <div className="text-muted text-sm">
-                          Reward pool:&nbsp;
-                          <span className="text-[#ff9090] font-mono">0.01–0.10</span>
-                          {' '}·{' '}
-                          <span className="text-[#A8E6FF] font-mono">1</span>
-                          {' '}·{' '}
-                          <span className="text-[#60ffb0] font-mono">3–5</span>
-                          {' '}Credits
+                  {/* Mine button + status */}
+                  {canMine ? (
+                    <div className="text-center py-6">
+                      {phase === 'mining' ? (
+                        <div className="space-y-4">
+                          <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center animate-pulse-glacier"
+                            style={{ background: 'rgba(168,230,255,0.08)', border: '2px solid rgba(168,230,255,0.25)' }}>
+                            <Loader2 className="w-8 h-8 text-[#A8E6FF] animate-spin" />
+                          </div>
+                          <div>
+                            <div className="text-white font-semibold">
+                              {status === 'confirming' ? 'Confirm in wallet...' : 'Recording on-chain...'}
+                            </div>
+                            <div className="text-muted text-sm mt-1">
+                              Your mining cycle is being registered on KNTC blockchain
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center group-hover:scale-105 transition-transform"
+                            style={{ background: 'rgba(96,255,176,0.08)', border: '2px solid rgba(96,255,176,0.25)' }}>
+                            <Pickaxe className="w-8 h-8 text-[#60ffb0]" />
+                          </div>
+                          <div>
+                            <div className="text-white font-semibold">Ready to start a mining cycle</div>
+                            <div className="text-muted text-sm mt-1">
+                              An ad will play (15–30s), then mining is recorded automatically
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {error && (
-                        <div className="mb-4 p-3 rounded-xl flex items-center gap-2"
+                        <div className="mt-4 p-3 rounded-xl flex items-center gap-2"
                           style={{ background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)' }}>
                           <AlertCircle className="w-4 h-4 text-[#ff9090] flex-shrink-0" />
                           <span className="text-[#ff9090] text-sm">{error}</span>
@@ -178,22 +216,15 @@ export default function Mine() {
                       )}
 
                       <button
-                        onClick={handleMine}
-                        disabled={status === 'confirming' || status === 'mining'}
-                        className="btn-primary w-full justify-center text-base py-3.5">
-                        {status === 'confirming' ? (
-                          <><Loader2 className="w-4 h-4 animate-spin" />Confirm in Wallet...</>
-                        ) : status === 'mining' ? (
-                          <><Loader2 className="w-4 h-4 animate-spin" />Recording on-chain...</>
-                        ) : (
-                          <><Pickaxe className="w-4 h-4" />Start Mining Cycle</>
-                        )}
+                        onClick={handleStartMine}
+                        disabled={phase === 'mining' || phase === 'ad'}
+                        className="btn-primary mx-auto mt-4 text-base px-10 py-3.5">
+                        <Pickaxe className="w-4 h-4" />
+                        {phase === 'mining' ? 'Mining...' : 'Mine'}
                       </button>
                     </div>
-                  )}
-
-                  {!canMine && phase === 'watch' && (
-                    <div className="mt-5">
+                  ) : (
+                    <div className="py-4">
                       <div className="card-inner p-4 text-center">
                         <div className="text-muted text-sm mb-1">Next cycle available in</div>
                         <div className="text-white font-bold text-2xl font-mono">
@@ -269,7 +300,7 @@ export default function Mine() {
           </div>
         </div>
 
-        {/* ── RIGHT: clock + allocation ── */}
+        {/* ── RIGHT: clock + protocol stats ── */}
         <div className="lg:col-span-2 space-y-5">
           <div className="card-glow p-6 flex flex-col items-center">
             <h3 className="font-bold text-white mb-5">Mining Cycle</h3>
@@ -293,10 +324,6 @@ export default function Mine() {
               ))}
             </div>
           )}
-
-          <div className="card p-5">
-            <TokenAllocation />
-          </div>
         </div>
       </div>
     </div>
