@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { publicClient, CONTRACT_ADDRESS, AD_WATCHED_EVENT } from '../lib/chain'
+import { publicClient, MINING_ADDRESS, AD_WATCHED_EVENT } from '../lib/chain'
 
 export interface AdEvent {
-  user:      `0x${string}`
-  timestamp: number
-  reward:    bigint
-  txHash:    `0x${string}`
+  user:        `0x${string}`
+  timestamp:   number
+  reward:      bigint
+  txHash:      `0x${string}`
   blockNumber: bigint
 }
 
@@ -14,9 +14,9 @@ async function fetchAdEvents(userAddress?: `0x${string}`): Promise<AdEvent[]> {
     const latest    = await publicClient.getBlockNumber()
     const fromBlock = latest > 10000n ? latest - 10000n : 0n
     const logs = await publicClient.getLogs({
-      address: CONTRACT_ADDRESS,
-      event: AD_WATCHED_EVENT,
-      args: userAddress ? { user: userAddress } : undefined,
+      address: MINING_ADDRESS,
+      event:   AD_WATCHED_EVENT,
+      args:    userAddress ? { user: userAddress } : undefined,
       fromBlock,
       toBlock: latest,
     })
@@ -34,10 +34,10 @@ async function fetchAdEvents(userAddress?: `0x${string}`): Promise<AdEvent[]> {
 
 export function useAdEvents(userAddress?: `0x${string}`) {
   return useQuery({
-    queryKey: ['adEvents', userAddress],
-    queryFn:  () => fetchAdEvents(userAddress),
+    queryKey:        ['adEvents', userAddress],
+    queryFn:         () => fetchAdEvents(userAddress),
     refetchInterval: 30_000,
-    staleTime: 15_000,
+    staleTime:       15_000,
   })
 }
 
@@ -56,6 +56,6 @@ export function useNetworkStatus() {
       }
     },
     refetchInterval: 15_000,
-    staleTime: 10_000,
+    staleTime:       10_000,
   })
 }

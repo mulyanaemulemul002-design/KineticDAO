@@ -1,71 +1,96 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { publicClient, CONTRACT_ADDRESS, KINETIC_ABI, MINING_CYCLE_S } from '../lib/chain'
+import { publicClient, MINING_ADDRESS, KINETIC_MINING_ABI, MINING_CYCLE_S } from '../lib/chain'
 import { getWalletClient } from '../lib/wallet'
 
-// ─── Protocol-level stats ─────────────────────────────────────────────────────
+// ─── Protocol stats ───────────────────────────────────────────────────────────
 
 export function useProtocolStats() {
   return useQuery({
     queryKey: ['protocolStats'],
     queryFn: async () => {
       try {
-        const [poolRemaining, totalMined, totalCycles, miners] = await Promise.all([
-          publicClient.readContract({ address: CONTRACT_ADDRESS, abi: KINETIC_ABI, functionName: 'miningPoolRemaining' }),
-          publicClient.readContract({ address: CONTRACT_ADDRESS, abi: KINETIC_ABI, functionName: 'totalMinedTokens' }),
-          publicClient.readContract({ address: CONTRACT_ADDRESS, abi: KINETIC_ABI, functionName: 'totalMiningCycles' }),
-          publicClient.readContract({ address: CONTRACT_ADDRESS, abi: KINETIC_ABI, functionName: 'uniqueMiners' }),
-        ])
+        const result = await publicClient.readContract({
+          address:      MINING_ADDRESS,
+          abi:          KINETIC_MINING_ABI,
+          functionName: 'getProtocolStats',
+        }) as [bigint, bigint, bigint, bigint, bigint, boolean]
+
         return {
-          poolRemaining: poolRemaining as bigint,
-          totalMined:    totalMined    as bigint,
-          totalCycles:   totalCycles   as bigint,
-          uniqueMiners:  miners        as bigint,
+          totalCycles:        result[0],
+          uniqueMiners:       result[1],
+          totalVirtualMined:  result[2],
+          totalTokensClaimed: result[3],
+          poolRemaining:      result[4],
+          tgeActive:          result[5],
+          // legacy alias used in existing UI
+          totalMined:         result[2],
         }
       } catch {
         return null
       }
     },
     refetchInterval: 30_000,
-    staleTime: 15_000,
+    staleTime:       15_000,
   })
 }
 
-// ─── User mining stats ────────────────────────────────────────────────────────
+// ─── User dashboard ───────────────────────────────────────────────────────────
+
+export interface UserDashboard {
+  pendingClaim: bigint
+  totalMined:   bigint
+  totalClaimed: bigint
+  cycleCount:   bigint
+  lastMineAt:   bigint
+  cooldown:     bigint
+  canMine:      boolean
+  tgeActive:    boolean
+  // legacy compat aliases
+  totalEarned:  bigint
+}
 
 export function useUserMiningStats(address?: `0x${string}`) {
   return useQuery({
-    queryKey: ['userMiningStats', address],
-    queryFn: async () => {
+    queryKey: ['userDashboard', address],
+    queryFn: async (): Promise<UserDashboard | null> => {
       if (!address) return null
       try {
         const result = await publicClient.readContract({
-          address: CONTRACT_ADDRESS,
-          abi: KINETIC_ABI,
-          functionName: 'getUserStats',
-          args: [address],
-        }) as [bigint, bigint, bigint, bigint, boolean]
+          address:      MINING_ADDRESS,
+          abi:          KINETIC_MINING_ABI,
+          functionName: 'getUserDashboard',
+          args:         [address],
+        }) as [bigint, bigint, bigint, bigint, bigint, bigint, boolean, boolean]
 
         return {
-          totalEarned: result[0],
-          cycleCount:  result[1],
-          lastMineAt:  result[2],
-          cooldown:    result[3],
-          canMine:     result[4],
+          pendingClaim: result[0],
+          totalMined:   result[1],
+          totalClaimed: result[2],
+          cycleCount:   result[3],
+          lastMineAt:   result[4],
+          cooldown:     result[5],
+          canMine:      result[6],
+          tgeActive:    result[7],
+          totalEarned:  result[0], // pending credits = what user considers "earned"
         }
       } catch {
         return {
-          totalEarned: 0n,
-          cycleCount:  0n,
-          lastMineAt:  0n,
-          cooldown:    0n,
-          canMine:     true,
+          pendingClaim: 0n,
+          totalMined:   0n,
+          totalClaimed: 0n,
+          cycleCount:   0n,
+          lastMineAt:   0n,
+          cooldown:     0n,
+          canMine:      true,
+          tgeActive:    false,
+          totalEarned:  0n,
         }
       }
     },
-    enabled: !!address,
+    enabled:         !!address,
     refetchInterval: 10_000,
-    staleTime: 5_000,
+    staleTime:       5_000,
   })
 }
 
@@ -88,7 +113,7 @@ async function fetchMiningEvents(userAddress?: `0x${string}`): Promise<MiningEve
     const fromBlock = latest > 10000n ? latest - 10000n : 0n
 
     const logs = await publicClient.getLogs({
-      address: CONTRACT_ADDRESS,
+      address: MINING_ADDRESS,
       event: {
         type: 'event',
         name: 'MiningCycleCompleted',
@@ -101,9 +126,9 @@ async function fetchMiningEvents(userAddress?: `0x${string}`): Promise<MiningEve
           { name: 'poolRemaining', type: 'uint256', indexed: false },
         ],
       } as const,
-      args: userAddress ? { user: userAddress } : undefined,
+      args:      userAddress ? { user: userAddress } : undefined,
       fromBlock,
-      toBlock: latest,
+      toBlock:   latest,
     })
 
     return logs.map(l => ({
@@ -123,10 +148,10 @@ async function fetchMiningEvents(userAddress?: `0x${string}`): Promise<MiningEve
 
 export function useMiningEvents(userAddress?: `0x${string}`) {
   return useQuery({
-    queryKey: ['miningEvents', userAddress],
-    queryFn:  () => fetchMiningEvents(userAddress),
+    queryKey:        ['miningEvents', userAddress],
+    queryFn:         () => fetchMiningEvents(userAddress),
     refetchInterval: 30_000,
-    staleTime: 15_000,
+    staleTime:       15_000,
   })
 }
 
@@ -145,7 +170,7 @@ export function useMineAction(address?: `0x${string}`) {
   const execute = useCallback(async () => {
     if (!address) { setError('Wallet not connected'); return }
     const wc = getWalletClient()
-    if (!wc) { setError('No wallet client'); return }
+    if (!wc)    { setError('No wallet client'); return }
 
     setStatus('confirming')
     setError(null)
@@ -158,48 +183,43 @@ export function useMineAction(address?: `0x${string}`) {
 
       setStatus('mining')
       const hash = await wc.writeContract({
-        address: CONTRACT_ADDRESS,
-        abi: KINETIC_ABI,
+        address:      MINING_ADDRESS,
+        abi:          KINETIC_MINING_ABI,
         functionName: 'mine',
         account,
-        chain: null,
+        chain:        null,
       })
       setTxHash(hash)
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
-      // Parse reward + tier from MiningCycleCompleted event
       for (const log of receipt.logs) {
-        if (log.address.toLowerCase() !== CONTRACT_ADDRESS.toLowerCase()) continue
+        if (log.address.toLowerCase() !== MINING_ADDRESS.toLowerCase()) continue
         try {
           const { decodeEventLog } = await import('viem')
           const decoded = decodeEventLog({
-            abi: KINETIC_ABI,
+            abi:       KINETIC_MINING_ABI,
             eventName: 'MiningCycleCompleted',
-            data: log.data,
-            topics: log.topics as [`0x${string}`, ...`0x${string}`[]],
+            data:      log.data,
+            topics:    log.topics as [`0x${string}`, ...`0x${string}`[]],
           })
-          if (decoded.args && 'reward' in decoded.args) {
-            setReward(decoded.args.reward as bigint)
-          }
-          if (decoded.args && 'tier' in decoded.args) {
-            setTier(Number(decoded.args.tier))
-          }
+          if (decoded.args && 'reward' in decoded.args) setReward(decoded.args.reward as bigint)
+          if (decoded.args && 'tier'   in decoded.args) setTier(Number(decoded.args.tier))
           break
         } catch { /* try next log */ }
       }
 
       setStatus('success')
-      queryClient.invalidateQueries({ queryKey: ['userMiningStats', address] })
+      queryClient.invalidateQueries({ queryKey: ['userDashboard', address] })
       queryClient.invalidateQueries({ queryKey: ['miningEvents'] })
       queryClient.invalidateQueries({ queryKey: ['protocolStats'] })
     } catch (err) {
       setStatus('error')
       const msg = err instanceof Error ? err.message : String(err)
       setError(
-        msg.includes('cooldown active') ? 'Mining cooldown active. Wait for next cycle.' :
-        msg.includes('User rejected')   ? 'Transaction rejected.' :
-        msg.includes('low balance')     ? 'Contract balance too low. Contact admin.' :
+        msg.includes('cooldown active') ? 'Mining cooldown active. Wait for next cycle.'   :
+        msg.includes('User rejected')   ? 'Transaction rejected.'                           :
+        msg.includes('pool depleted')   ? 'Mining pool depleted. Contact admin.'           :
         'Transaction failed. Try again.'
       )
     }
@@ -214,6 +234,63 @@ export function useMineAction(address?: `0x${string}`) {
   }, [])
 
   return { status, txHash, reward, tier, error, execute, reset }
+}
+
+// ─── Claim action (post-TGE) ──────────────────────────────────────────────────
+
+export type ClaimStatus = 'idle' | 'confirming' | 'claiming' | 'success' | 'error'
+
+export function useClaimAction(address?: `0x${string}`) {
+  const queryClient = useQueryClient()
+  const [status, setStatus] = useState<ClaimStatus>('idle')
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
+  const [error,  setError]  = useState<string | null>(null)
+
+  const execute = useCallback(async () => {
+    if (!address) { setError('Wallet not connected'); return }
+    const wc = getWalletClient()
+    if (!wc)    { setError('No wallet client'); return }
+
+    setStatus('confirming')
+    setError(null)
+    setTxHash(null)
+
+    try {
+      const [account] = await wc.getAddresses()
+
+      setStatus('claiming')
+      const hash = await wc.writeContract({
+        address:      MINING_ADDRESS,
+        abi:          KINETIC_MINING_ABI,
+        functionName: 'claimTokens',
+        account,
+        chain:        null,
+      })
+      setTxHash(hash)
+      await publicClient.waitForTransactionReceipt({ hash })
+
+      setStatus('success')
+      queryClient.invalidateQueries({ queryKey: ['userDashboard', address] })
+      queryClient.invalidateQueries({ queryKey: ['protocolStats'] })
+    } catch (err) {
+      setStatus('error')
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(
+        msg.includes('TGE not active') ? 'TGE belum aktif. Claim akan dibuka saat peluncuran.' :
+        msg.includes('nothing to claim') ? 'Tidak ada kredit untuk diklaim.' :
+        msg.includes('User rejected')    ? 'Transaksi dibatalkan.' :
+        'Claim gagal. Coba lagi.'
+      )
+    }
+  }, [address, queryClient])
+
+  const reset = useCallback(() => {
+    setStatus('idle')
+    setTxHash(null)
+    setError(null)
+  }, [])
+
+  return { status, txHash, error, execute, reset }
 }
 
 // ─── Live countdown ───────────────────────────────────────────────────────────

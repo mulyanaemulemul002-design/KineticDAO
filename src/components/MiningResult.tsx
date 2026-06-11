@@ -9,9 +9,9 @@ interface MiningResultProps {
 }
 
 const TIER_META = {
-  0: { icon: Frown, label: 'Apes Session',  sub: 'Better luck next time',     bg: 'rgba(255,80,80,0.08)',   border: 'rgba(255,80,80,0.2)'  },
+  0: { icon: Frown, label: 'Apes Session',  sub: 'Better luck next time',     bg: 'rgba(255,80,80,0.08)',   border: 'rgba(255,80,80,0.2)'   },
   1: { icon: Smile, label: 'Basic Session', sub: 'Steady mining, keep going', bg: 'rgba(168,230,255,0.06)', border: 'rgba(168,230,255,0.18)' },
-  2: { icon: Star,  label: 'Hoki Session!', sub: 'Lucky roll — jackpot!',     bg: 'rgba(96,255,176,0.08)', border: 'rgba(96,255,176,0.25)' },
+  2: { icon: Star,  label: 'Hoki Session!', sub: 'Lucky roll — jackpot!',     bg: 'rgba(96,255,176,0.08)',  border: 'rgba(96,255,176,0.25)'  },
 } as const
 
 export default function MiningResult({ reward, tier, txHash, onReset }: MiningResultProps) {
@@ -41,14 +41,17 @@ export default function MiningResult({ reward, tier, txHash, onReset }: MiningRe
         {meta.label}
       </div>
 
-      {/* Reward amount */}
+      {/* Credit amount */}
       {reward !== null && reward > 0n ? (
         <div className="animate-count-up">
           <div className="text-5xl font-black text-white mb-1 tabular-nums">
             +{formatKNTC(reward)}
           </div>
-          <div className="font-bold text-lg mb-1" style={{ color }}>KNTC Earned</div>
-          <div className="text-muted text-sm">{meta.sub}</div>
+          <div className="font-bold text-lg mb-1" style={{ color }}>Kinetic Credits Added</div>
+          <div className="text-muted text-xs mb-1">
+            Recorded on-chain — claimable as real KNTC after TGE
+          </div>
+          <div className="text-subtle text-xs">{meta.sub}</div>
         </div>
       ) : (
         <div className="text-xl font-bold text-white">Mining cycle recorded on-chain</div>
@@ -57,7 +60,7 @@ export default function MiningResult({ reward, tier, txHash, onReset }: MiningRe
       {/* Transaction */}
       {txHash && (
         <div className="mt-6 p-3 rounded-xl bg-[rgba(0,16,32,0.4)] border border-[rgba(168,230,255,0.08)]">
-          <div className="text-muted text-xs mb-1">Transaction</div>
+          <div className="text-muted text-xs mb-1">On-chain Transaction</div>
           <a href={explorerUrl!} target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 font-mono text-xs text-[#A8E6FF] hover:text-white transition-colors">
             <CheckCircle className="w-3 h-3" />

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Wallet, Pickaxe, Coins, TrendingUp, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react'
+import { Wallet, Pickaxe, Coins, TrendingUp, ExternalLink, RefreshCw, AlertCircle, Lock, Gift } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
 import { useUserMiningStats, useMiningEvents, useProtocolStats } from '../hooks/useMining'
 import { formatKNTC, formatAddress, maculatusTestnet } from '../lib/chain'
@@ -33,11 +33,14 @@ export default function Dashboard() {
 
   const refresh = () => { refetchStats(); refetchEvents(); refetchProtocol() }
 
-  const totalEarned = stats?.totalEarned ?? 0n
-  const cycleCount  = Number(stats?.cycleCount ?? 0n)
-  const cooldown    = Number(stats?.cooldown ?? 0n)
-  const canMine     = stats?.canMine ?? true
-  const lastMineAt  = Number(stats?.lastMineAt ?? 0n)
+  const pendingClaim = stats?.pendingClaim ?? 0n
+  const totalMined   = stats?.totalMined   ?? 0n
+  const totalClaimed = stats?.totalClaimed ?? 0n
+  const cycleCount   = Number(stats?.cycleCount ?? 0n)
+  const cooldown     = Number(stats?.cooldown   ?? 0n)
+  const canMine      = stats?.canMine      ?? true
+  const lastMineAt   = Number(stats?.lastMineAt ?? 0n)
+  const tgeActive    = stats?.tgeActive    ?? false
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
@@ -63,10 +66,64 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Earned"  value={`${formatKNTC(totalEarned)} KNTC`} icon={Coins}    color="#60ffb0" loading={sLoading} />
-        <StatCard label="Cycles Done"   value={cycleCount.toString()}            icon={Pickaxe}  color="#A8E6FF" loading={sLoading} />
-        <StatCard label="Per Day"       value="2x"                               icon={TrendingUp} color="#ffd060" />
-        <StatCard label="Pool Global"   value={protocol ? `${formatKNTC(protocol.poolRemaining)} KNTC` : '—'} sub="Remaining" icon={Coins} color="#c090ff" loading={!protocol} />
+        <StatCard
+          label="Kinetic Credits (Virtual)"
+          value={`${formatKNTC(pendingClaim)} KNTC`}
+          icon={Coins}
+          color="#60ffb0"
+          loading={sLoading}
+          sub="Unclaimed"
+        />
+        <StatCard
+          label="Total Mined (All-time)"
+          value={`${formatKNTC(totalMined)} KNTC`}
+          icon={TrendingUp}
+          color="#A8E6FF"
+          loading={sLoading}
+        />
+        <StatCard
+          label="Cycles Done"
+          value={cycleCount.toString()}
+          icon={Pickaxe}
+          color="#ffd060"
+          loading={sLoading}
+        />
+        <StatCard
+          label="Pool Remaining"
+          value={protocol ? `${formatKNTC(protocol.poolRemaining)} KNTC` : '—'}
+          sub="Global"
+          icon={Coins}
+          color="#c090ff"
+          loading={!protocol}
+        />
+      </div>
+
+      {/* Pre-TGE claim banner */}
+      <div className="p-4 rounded-xl flex items-center justify-between gap-4"
+        style={{ background: 'rgba(168,230,255,0.05)', border: '1px solid rgba(168,230,255,0.12)' }}>
+        <div className="flex items-start gap-3">
+          {tgeActive
+            ? <Gift className="w-5 h-5 text-[#60ffb0] mt-0.5 flex-shrink-0" />
+            : <Lock className="w-5 h-5 text-[#A8E6FF] mt-0.5 flex-shrink-0" />}
+          <div>
+            <div className="text-white font-semibold text-sm">
+              {tgeActive ? 'TGE Active — Claim your KNTC!' : 'Pre-TGE: Credits locked until launch'}
+            </div>
+            <div className="text-muted text-xs mt-0.5">
+              {tgeActive
+                ? `You have ${formatKNTC(pendingClaim)} KNTC ready to claim.`
+                : `${formatKNTC(pendingClaim)} KNTC virtual credits will become real tokens at TGE.`}
+            </div>
+            {totalClaimed > 0n && (
+              <div className="text-subtle text-xs mt-0.5">
+                Already claimed: {formatKNTC(totalClaimed)} KNTC
+              </div>
+            )}
+          </div>
+        </div>
+        <Link to="/mine" className="btn-primary text-sm py-2 px-4 whitespace-nowrap flex-shrink-0">
+          {tgeActive ? <><Gift className="w-3.5 h-3.5" />Claim</> : <><Pickaxe className="w-3.5 h-3.5" />Mine</>}
+        </Link>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -113,11 +170,12 @@ export default function Dashboard() {
           <div className="card p-5 space-y-3">
             <h3 className="font-semibold text-white text-sm">Network</h3>
             {[
-              { l: 'Network',    v: 'Maculatus Testnet' },
-              { l: 'Chain ID',   v: '10778' },
-              { l: 'Currency',   v: 'KNTC' },
-              { l: 'Cycle',      v: '12 hours' },
-              { l: 'Last Mine',  v: lastMineAt > 0 ? new Date(lastMineAt * 1000).toLocaleString() : 'Never' },
+              { l: 'Network',   v: 'Maculatus Testnet' },
+              { l: 'Chain ID',  v: '10778' },
+              { l: 'Token',     v: 'KNTC (ERC-20)' },
+              { l: 'Cycle',     v: '12 hours' },
+              { l: 'TGE',       v: tgeActive ? 'Active' : 'Pre-Launch' },
+              { l: 'Last Mine', v: lastMineAt > 0 ? new Date(lastMineAt * 1000).toLocaleString() : 'Never' },
             ].map(({ l, v }) => (
               <div key={l} className="flex justify-between">
                 <span className="text-muted text-sm">{l}</span>
@@ -131,9 +189,10 @@ export default function Dashboard() {
             <div className="card p-5 space-y-3">
               <h3 className="font-semibold text-white text-sm">Protocol</h3>
               {[
-                { l: 'Total Cycles',  v: protocol.totalCycles.toString(),           c: '#A8E6FF' },
-                { l: 'Unique Miners', v: protocol.uniqueMiners.toString(),           c: '#A8E6FF' },
-                { l: 'Total Mined',   v: `${formatKNTC(protocol.totalMined)} KNTC`,   c: '#60ffb0' },
+                { l: 'Total Cycles',   v: protocol.totalCycles.toString(),              c: '#A8E6FF' },
+                { l: 'Unique Miners',  v: protocol.uniqueMiners.toString(),             c: '#A8E6FF' },
+                { l: 'Virtual Mined',  v: `${formatKNTC(protocol.totalMined)} KNTC`,    c: '#60ffb0' },
+                { l: 'Tokens Claimed', v: `${formatKNTC(protocol.totalTokensClaimed)} KNTC`, c: '#c090ff' },
               ].map(({ l, v, c }) => (
                 <div key={l} className="flex justify-between">
                   <span className="text-muted text-sm">{l}</span>
