@@ -225,6 +225,10 @@ export const MINING_COMPLETED_EVENT = parseAbiItem(
   'event MiningCycleCompleted(address indexed user, uint256 indexed cycleId, uint256 reward, uint8 tier, uint256 timestamp, uint256 poolRemaining)'
 )
 
+export const AD_WATCHED_EVENT = parseAbiItem(
+  'event AdWatched(address indexed user, uint256 reward, uint256 timestamp)'
+)
+
 // ─── Protocol constants ───────────────────────────────────────────────────────
 export const TOTAL_SUPPLY    = 1_000_000_000n * 10n ** 18n
 export const MINING_POOL_KNTC=   700_000_000n * 10n ** 18n
