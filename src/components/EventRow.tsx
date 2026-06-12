@@ -1,17 +1,17 @@
 import { ExternalLink } from 'lucide-react'
-import { formatAddress, formatKNTC, timeAgo, maculatusTestnet, TIER_LABEL, TIER_COLOR, type RewardTier } from '../lib/chain'
+import { formatAddress, formatRate, timeAgo, maculatusTestnet, TIER_LABEL, TIER_COLOR, type RewardTier } from '../lib/chain'
 
 interface EventRowProps {
   user:        `0x${string}`
   timestamp:   number
-  reward:      bigint
+  ratePerHour: bigint
   tier?:       number
   txHash:      `0x${string}`
   blockNumber: bigint
   highlight?:  boolean
 }
 
-export default function EventRow({ user, timestamp, reward, tier, txHash, blockNumber, highlight }: EventRowProps) {
+export default function EventRow({ user, timestamp, ratePerHour, tier, txHash, blockNumber, highlight }: EventRowProps) {
   const txUrl   = `${maculatusTestnet.blockExplorers.default.url}/tx/${txHash}`
   const addrUrl = `${maculatusTestnet.blockExplorers.default.url}/address/${user}`
 
@@ -36,7 +36,7 @@ export default function EventRow({ user, timestamp, reward, tier, txHash, blockN
             className="font-mono text-sm text-[rgba(168,230,255,0.7)] hover:text-[#A8E6FF] transition-colors">
             {formatAddress(user)}
           </a>
-          <span className="text-subtle text-xs">mined</span>
+          <span className="text-subtle text-xs">started</span>
           <span className="text-xs font-semibold" style={{ color }}>{label}</span>
         </div>
         <div className="text-subtle text-xs mt-0.5">
@@ -44,10 +44,13 @@ export default function EventRow({ user, timestamp, reward, tier, txHash, blockN
         </div>
       </div>
 
-      {/* Reward */}
+      {/* Rate */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <div className="text-sm font-bold font-mono" style={{ color }}>
-          +{formatKNTC(reward)} KNTC
+        <div className="text-right">
+          <div className="text-sm font-bold font-mono" style={{ color }}>
+            {formatRate(ratePerHour)}
+          </div>
+          <div className="text-subtle text-[10px]">mining rate</div>
         </div>
         <a href={txUrl} target="_blank" rel="noopener noreferrer"
           className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted hover:text-[#A8E6FF]

@@ -1,7 +1,7 @@
 import { Smartphone, Zap, Shield, Gift, ExternalLink } from 'lucide-react'
 
 const FEATURES = [
-  { icon: Zap,      color: '#A8E6FF', title: 'Ad-to-Earn Mining',   desc: 'Watch a 15–30s ad popup, then mining triggers automatically on-chain — no extra click needed.' },
+  { icon: Zap,      color: '#A8E6FF', title: 'Ad-to-Earn Mining',   desc: 'Watch a 15–30s ad, then a 24-hour mining session starts on-chain. Points accrue linearly every second.' },
   { icon: Shield,   color: '#60ffb0', title: 'Fully On-Chain',      desc: 'Every mining cycle is recorded as a blockchain event. No database, no middleman.' },
   { icon: Gift,     color: '#ffd060', title: 'Claim After TGE',     desc: 'Credits accumulate on-chain during pre-TGE. Real KNTC tokens claimable after Token Generation Event.' },
 ]
@@ -18,7 +18,7 @@ export default function Mine() {
 
       <h1 className="text-3xl font-black text-white mb-3 text-center">Mining is on Mobile</h1>
       <p className="text-muted text-center max-w-md mb-10 leading-relaxed">
-        The KineticDAO mining app has moved to mobile. Download the app to watch ads and earn KNTC credits on-chain — twice every day.
+        The KineticDAO mining app has moved to mobile. Download the app to watch ads and start 24-hour mining sessions on-chain — once every day, points accumulate in real-time.
       </p>
 
       {/* Feature cards */}

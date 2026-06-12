@@ -38,13 +38,13 @@ outputType = "webview"
 name = "Start Mobile"
 author = "agent"
 
-[workflows.workflow.metadata]
-outputType = "console"
-
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd mobile && npm run web"
 waitForPort = 8080
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [[ports]]
 localPort = 5000
@@ -57,6 +57,10 @@ externalPort = 3001
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
 
 [deployment]
 deploymentTarget = "static"

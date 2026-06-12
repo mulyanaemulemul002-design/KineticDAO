@@ -25,12 +25,10 @@ export default function MiningClock({ cooldownSeconds, cycleCount }: MiningClock
       {/* Ring */}
       <div className="relative" style={{ width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} style={{ transform: 'rotate(-90deg)' }}>
-          {/* Track */}
           <circle
             cx={SIZE / 2} cy={SIZE / 2} r={R}
             fill="none" stroke="rgba(168,230,255,0.07)" strokeWidth={STROKE}
           />
-          {/* Fill */}
           <circle
             cx={SIZE / 2} cy={SIZE / 2} r={R}
             fill="none"
@@ -43,7 +41,6 @@ export default function MiningClock({ cooldownSeconds, cycleCount }: MiningClock
           />
         </svg>
 
-        {/* Inner content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {ready ? (
             <div className="animate-count-up text-center">
@@ -60,7 +57,6 @@ export default function MiningClock({ cooldownSeconds, cycleCount }: MiningClock
           )}
         </div>
 
-        {/* Orbit dot */}
         {!ready && (
           <div className="absolute inset-0 animate-orbit-slow pointer-events-none">
             <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#A8E6FF]"
@@ -77,7 +73,6 @@ export default function MiningClock({ cooldownSeconds, cycleCount }: MiningClock
         )}
       </div>
 
-      {/* Info row */}
       <div className="flex items-center gap-6 text-center">
         <div>
           <div className="text-xl font-bold text-white tabular-nums">{cycleCount}</div>
@@ -85,12 +80,12 @@ export default function MiningClock({ cooldownSeconds, cycleCount }: MiningClock
         </div>
         <div className="w-px h-8 bg-[rgba(168,230,255,0.08)]" />
         <div>
-          <div className="text-xl font-bold text-white">2x</div>
+          <div className="text-xl font-bold text-white">1x</div>
           <div className="text-xs text-muted">Per Day</div>
         </div>
         <div className="w-px h-8 bg-[rgba(168,230,255,0.08)]" />
         <div>
-          <div className="text-xl font-bold text-white">12h</div>
+          <div className="text-xl font-bold text-white">24h</div>
           <div className="text-xs text-muted">Cycle</div>
         </div>
       </div>

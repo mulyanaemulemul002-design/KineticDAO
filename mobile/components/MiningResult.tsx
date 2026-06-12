@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { ethers } from 'ethers'
 import { C } from '../constants/colors'
-import { TIER_LABEL, TIER_COLOR, TIER_RANGE, EXPLORER_URL, formatKNTC } from '../lib/mining'
+import { TIER_LABEL, TIER_COLOR, TIER_RATE, EXPLORER_URL, formatRate } from '../lib/mining'
 
 interface MiningResultProps {
-  reward:  ethers.BigNumber | null
-  tier:    number
-  txHash:  string | null
-  onReset: () => void
+  ratePerHour: ethers.BigNumber | null
+  tier:        number
+  txHash:      string | null
+  onReset:     () => void
 }
 
 const TIER_ICON: ('sad-outline' | 'happy-outline' | 'star')[] = ['sad-outline', 'happy-outline', 'star']
@@ -19,13 +19,13 @@ const TIER_BG = [
   'rgba(96,255,176,0.08)',
 ]
 
-export default function MiningResult({ reward, tier, txHash, onReset }: MiningResultProps) {
+export default function MiningResult({ ratePerHour, tier, txHash, onReset }: MiningResultProps) {
   const safeTier = (typeof tier === 'number' && tier >= 0 && tier <= 2 ? tier : 1)
   const color    = TIER_COLOR[safeTier]
   const bg       = TIER_BG[safeTier]
   const icon     = TIER_ICON[safeTier]
   const label    = TIER_LABEL[safeTier]
-  const range    = TIER_RANGE[safeTier]
+  const rate     = TIER_RATE[safeTier]
 
   function openExplorer() {
     if (txHash) Linking.openURL(`${EXPLORER_URL}/tx/${txHash}`)
@@ -41,20 +41,18 @@ export default function MiningResult({ reward, tier, txHash, onReset }: MiningRe
 
       {/* Tier badge */}
       <View style={[s.badge, { borderColor: `${color}40` }]}>
-        <Text style={[s.badgeText, { color }]}>{label.toUpperCase()} — {range}</Text>
+        <Text style={[s.badgeText, { color }]}>{label.toUpperCase()} TIER</Text>
       </View>
 
-      {/* Amount */}
-      {reward && reward.gt(0) ? (
-        <View style={s.amountWrap}>
-          <Text style={s.amountSign}>+</Text>
-          <Text style={[s.amount, { color }]}>{formatKNTC(reward)}</Text>
-          <Text style={s.amountUnit}>Credits</Text>
-          <Text style={s.subText}>Recorded on-chain · Claimable after TGE</Text>
-        </View>
-      ) : (
-        <Text style={s.fallback}>Mining cycle recorded on-chain</Text>
-      )}
+      {/* Rate */}
+      <View style={s.rateWrap}>
+        <Text style={[s.rateValue, { color }]}>
+          {ratePerHour ? formatRate(ratePerHour) : rate}
+        </Text>
+        <Text style={s.rateLabel}>Mining Rate / hour</Text>
+        <Text style={s.subText}>Session active for 24 hours · Points accrue linearly on-chain</Text>
+        <Text style={s.subText}>Claimable as real KNTC after TGE</Text>
+      </View>
 
       {/* Tx link */}
       {txHash && (
@@ -73,18 +71,16 @@ export default function MiningResult({ reward, tier, txHash, onReset }: MiningRe
 }
 
 const s = StyleSheet.create({
-  wrap:       { borderRadius: 20, padding: 24, alignItems: 'center', borderWidth: 1, marginTop: 8 },
-  iconWrap:   { width: 68, height: 68, borderRadius: 20, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginBottom: 14, backgroundColor: 'rgba(0,0,0,0.3)' },
-  badge:      { borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5, marginBottom: 18 },
-  badgeText:  { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
-  amountWrap: { alignItems: 'center', marginBottom: 4 },
-  amountSign: { color: 'rgba(255,255,255,0.5)', fontSize: 20, fontWeight: '700', lineHeight: 28 },
-  amount:     { fontSize: 52, fontWeight: '900', lineHeight: 58 },
-  amountUnit: { color: C.text, fontSize: 16, fontWeight: '700', marginTop: 2 },
-  subText:    { color: C.muted, fontSize: 11, marginTop: 6, textAlign: 'center' },
-  fallback:   { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 12 },
-  txRow:      { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 16, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 10, backgroundColor: 'rgba(0,16,32,0.5)', borderWidth: 1, borderColor: C.border },
-  txText:     { color: C.accent, fontFamily: 'monospace', fontSize: 11 },
-  resetBtn:   { marginTop: 18, paddingVertical: 11, paddingHorizontal: 32, borderRadius: 12, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(168,230,255,0.06)' },
-  resetText:  { color: C.text, fontWeight: '700', fontSize: 14 },
+  wrap:      { borderRadius: 20, padding: 24, alignItems: 'center', borderWidth: 1, marginTop: 8 },
+  iconWrap:  { width: 68, height: 68, borderRadius: 20, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginBottom: 14, backgroundColor: 'rgba(0,0,0,0.3)' },
+  badge:     { borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5, marginBottom: 18 },
+  badgeText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+  rateWrap:  { alignItems: 'center', marginBottom: 4 },
+  rateValue: { fontSize: 36, fontWeight: '900', lineHeight: 42 },
+  rateLabel: { color: C.text, fontSize: 14, fontWeight: '700', marginTop: 4 },
+  subText:   { color: C.muted, fontSize: 11, marginTop: 5, textAlign: 'center' },
+  txRow:     { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 16, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 10, backgroundColor: 'rgba(0,16,32,0.5)', borderWidth: 1, borderColor: C.border },
+  txText:    { color: C.accent, fontFamily: 'monospace', fontSize: 11 },
+  resetBtn:  { marginTop: 18, paddingVertical: 11, paddingHorizontal: 32, borderRadius: 12, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(168,230,255,0.06)' },
+  resetText: { color: C.text, fontWeight: '700', fontSize: 14 },
 })

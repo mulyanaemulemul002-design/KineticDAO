@@ -1,11 +1,11 @@
 import { CheckCircle, ExternalLink, Frown, Smile, Star } from 'lucide-react'
-import { formatKNTC, maculatusTestnet, TIER_LABEL, TIER_COLOR, TIER_RANGE, type RewardTier } from '../lib/chain'
+import { maculatusTestnet, TIER_LABEL, TIER_COLOR, TIER_RATE, formatRate, type RewardTier } from '../lib/chain'
 
 interface MiningResultProps {
-  reward:  bigint | null
-  tier?:   number | null
-  txHash:  `0x${string}` | null
-  onReset: () => void
+  ratePerHour: bigint | null
+  tier?:       number | null
+  txHash:      `0x${string}` | null
+  onReset:     () => void
 }
 
 const TIER_META = {
@@ -14,7 +14,7 @@ const TIER_META = {
   2: { icon: Star,  label: 'Hoki Session!', sub: 'Lucky roll — jackpot!',     bg: 'rgba(96,255,176,0.08)',  border: 'rgba(96,255,176,0.25)'  },
 } as const
 
-export default function MiningResult({ reward, tier, txHash, onReset }: MiningResultProps) {
+export default function MiningResult({ ratePerHour, tier, txHash, onReset }: MiningResultProps) {
   const explorerUrl = txHash ? `${maculatusTestnet.blockExplorers.default.url}/tx/${txHash}` : null
   const safeTier    = (typeof tier === 'number' && tier in TIER_META ? tier : 1) as RewardTier
   const meta        = TIER_META[safeTier]
@@ -34,28 +34,24 @@ export default function MiningResult({ reward, tier, txHash, onReset }: MiningRe
       {/* Tier badge */}
       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-3"
         style={{ background: `rgba(${hexToRgb(color)},0.1)`, border: `1px solid rgba(${hexToRgb(color)},0.25)`, color }}>
-        {TIER_LABEL[safeTier].toUpperCase()} — {TIER_RANGE[safeTier]}
+        {TIER_LABEL[safeTier].toUpperCase()} — {TIER_RATE[safeTier]}
       </div>
 
       <div className="text-muted text-xs uppercase tracking-widest mb-2 font-semibold">
         {meta.label}
       </div>
 
-      {/* Credit amount */}
-      {reward !== null && reward > 0n ? (
-        <div className="animate-count-up">
-          <div className="text-5xl font-black text-white mb-1 tabular-nums">
-            +{formatKNTC(reward)}
-          </div>
-          <div className="font-bold text-lg mb-1" style={{ color }}>Kinetic Credits Added</div>
-          <div className="text-muted text-xs mb-1">
-            Recorded on-chain — claimable as real KNTC after TGE
-          </div>
-          <div className="text-subtle text-xs">{meta.sub}</div>
+      {/* Mining rate */}
+      <div className="animate-count-up">
+        <div className="text-5xl font-black tabular-nums mb-1" style={{ color }}>
+          {ratePerHour ? formatRate(ratePerHour) : TIER_RATE[safeTier]}
         </div>
-      ) : (
-        <div className="text-xl font-bold text-white">Mining cycle recorded on-chain</div>
-      )}
+        <div className="font-bold text-lg mb-1 text-white">Mining Rate Active</div>
+        <div className="text-muted text-xs mb-1">
+          Session runs 24h — points accrue linearly on-chain
+        </div>
+        <div className="text-subtle text-xs">{meta.sub}</div>
+      </div>
 
       {/* Transaction */}
       {txHash && (

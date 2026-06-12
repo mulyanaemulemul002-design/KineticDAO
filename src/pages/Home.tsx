@@ -3,7 +3,7 @@ import { ArrowRight, Pickaxe, Shield, Coins, ChevronDown, Zap } from 'lucide-rea
 import { useProtocolStats } from '../hooks/useMining'
 import { useMiningEvents } from '../hooks/useMining'
 import { useWallet } from '../hooks/useWallet'
-import { formatKNTC } from '../lib/chain'
+import { formatPoints } from '../lib/chain'
 import EventRow from '../components/EventRow'
 import WalletButton from '../components/WalletButton'
 
@@ -11,19 +11,19 @@ const features = [
   {
     icon: Pickaxe,
     title: 'Ad-to-Earn Mining',
-    desc: 'Watch a 15-second ad and trigger a 12-hour mining cycle — earn random KNTC rewards twice every day.',
+    desc: 'Watch a 15-second ad and start a 24-hour mining session — earn linear credits every hour based on your Gacha rate.',
     color: '#A8E6FF',
   },
   {
     icon: Shield,
     title: 'Fully On-Chain',
-    desc: 'Every mining cycle is recorded as an on-chain event. No database, no middleman — pure blockchain transparency.',
+    desc: 'Every mining session is recorded as an on-chain event. No database, no middleman — pure blockchain transparency.',
     color: '#60ffb0',
   },
   {
     icon: Coins,
-    title: '300M Mining Pool',
-    desc: '300 million KNTC allocated exclusively for miners. Rewards distributed randomly from 1K to 50K KNTC per cycle.',
+    title: '875B Point Pool',
+    desc: '875 billion credits allocated for miners. Rank-based halving auto-activates at 500B (Rank 2) and 750B (Rank 3) global points.',
     color: '#ffd060',
   },
 ]
@@ -61,8 +61,8 @@ export default function Home() {
           </h1>
 
           <p className="text-xl text-muted mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-up">
-            KineticDAO is a decentralized Ad-to-Earn protocol. Every ad you watch triggers a
-            12-hour mining cycle — recorded transparently on the KNTC blockchain.
+            KineticDAO is a decentralized Ad-to-Earn protocol. Every ad you watch starts a
+            24-hour mining session — points accumulate linearly on-chain, claimable as real KNTC after TGE.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 animate-slide-up">
@@ -85,9 +85,9 @@ export default function Home() {
           {protocol && (
             <div className="mt-16 grid grid-cols-3 gap-6 max-w-sm mx-auto animate-fade-in">
               {[
-                { v: protocol.totalCycles.toString(),          l: 'Mining Cycles'  },
-                { v: protocol.uniqueMiners.toString(),         l: 'Miners'         },
-                { v: `${formatKNTC(protocol.totalMined)} KNTC`,  l: 'Distributed'   },
+                { v: protocol.totalCycles.toString(),               l: 'Sessions'       },
+                { v: protocol.uniqueMiners.toString(),              l: 'Miners'         },
+                { v: `${formatPoints(protocol.totalPointsMinted ?? 0n)} pts`, l: 'Points Minted' },
               ].map(({ v, l }) => (
                 <div key={l} className="text-center">
                   <div className="text-2xl font-black text-white tabular-nums">{v}</div>

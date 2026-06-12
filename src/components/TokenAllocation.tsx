@@ -1,5 +1,5 @@
 import { useProtocolStats } from '../hooks/useMining'
-import { MINING_POOL, INVESTOR_POOL, TEAM_POOL, ECOSYSTEM_POOL, TOTAL_SUPPLY, formatKNTC } from '../lib/chain'
+import { MINING_POOL_KNTC, INVESTOR_POOL, TEAM_POOL, ECOSYSTEM_POOL, TOTAL_SUPPLY, RANK_3_LIMIT_PTS, formatKNTC, formatPoints } from '../lib/chain'
 import { Pickaxe, TrendingUp, Users, Leaf } from 'lucide-react'
 
 const ALLOCATIONS = [
@@ -7,10 +7,10 @@ const ALLOCATIONS = [
     key: 'mining',
     label: 'Mining Pool',
     icon: Pickaxe,
-    amount: MINING_POOL,
+    amount: MINING_POOL_KNTC,
     pct: 70,
     color: '#A8E6FF',
-    description: 'Distributed to miners via 12h cycles — lasts 2–2.5 years',
+    description: 'Distributed via 24h sessions — rank-based halving (Blueprint Phase 1)',
   },
   {
     key: 'ecosystem',
@@ -44,8 +44,8 @@ const ALLOCATIONS = [
 export default function TokenAllocation() {
   const { data: stats } = useProtocolStats()
 
-  const minedPct = stats
-    ? Number((stats.totalMined * 100_000n) / MINING_POOL) / 1000
+  const minedPct = stats && stats.totalPointsMinted > 0n
+    ? Number((stats.totalPointsMinted * 100_000n) / RANK_3_LIMIT_PTS) / 1000
     : 0
 
   return (
@@ -115,9 +115,9 @@ export default function TokenAllocation() {
       {/* Mining pool live counter */}
       {stats && (
         <div className="card-inner p-3 flex items-center justify-between">
-          <span className="text-muted text-xs">Mining pool consumed</span>
+          <span className="text-muted text-xs">Point quota consumed</span>
           <span className="font-mono text-xs text-[#A8E6FF] font-bold">
-            {formatKNTC(stats.totalMined)} / {formatKNTC(MINING_POOL)} KNTC
+            {formatPoints(stats.totalPointsMinted ?? 0n)} / 875B pts
             &nbsp;<span className="text-subtle">({minedPct.toFixed(4)}%)</span>
           </span>
         </div>
