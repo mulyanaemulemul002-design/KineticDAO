@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "KineticDAO",
+    "slug": "kinetic-dao-mobile",
+    "version": "1.0.0",
+    "scheme": "kineticdao",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#000e1e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kineticdao.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#000e1e"
+      },
+      "package": "com.kineticdao.mobile"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": ["expo-router"]
+  }
+}

@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Pickaxe, BarChart3, Activity, Home, Menu, X, Zap } from 'lucide-react'
+import { BarChart3, Activity, Home, Menu, X, Zap, Smartphone } from 'lucide-react'
 import WalletButton from './WalletButton'
 import NetworkBadge from './NetworkBadge'
 import clsx from 'clsx'
 
 const links = [
   { to: '/',          label: 'Home',      icon: Home     },
-  { to: '/mine',      label: 'Mine',      icon: Pickaxe  },
   { to: '/dashboard', label: 'Dashboard', icon: BarChart3 },
   { to: '/activity',  label: 'Activity',  icon: Activity  },
+  { to: '/mine',      label: 'Get App',   icon: Smartphone },
 ]
 
 export default function Navbar() {
@@ -55,8 +55,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile toggle */}
-          <button onClick={() => setOpen(!open)}
-            className="md:hidden btn-ghost p-2">
+          <button onClick={() => setOpen(!open)} className="md:hidden btn-ghost p-2">
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
